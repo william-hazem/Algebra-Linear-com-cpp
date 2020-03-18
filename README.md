@@ -1,14 +1,15 @@
 # Algebra-Linear-com-cpp
 Este repositório contém abstrações para matrizes e para resolver sistemas lineares
 
-Matrizes (classe):
+**Matrizes (classe):**
   - Operações elementares
   - Determinante
   - Transposta
   - Sub-Matrizes
   
-Algebra Linear:
+**Algebra Linear:**
   - Método de Gauss-Seidel para solução de sistemas quadráticos(Matrizes quadradas)
+  - Posto
   - Máximo
   - Mínimo
   - operações complementares
