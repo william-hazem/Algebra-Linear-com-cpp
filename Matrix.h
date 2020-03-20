@@ -1,24 +1,41 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#include "OverLoad.h"
+
 #include <clocale>
 #include <iostream>
 #include <iomanip>
-#include <vector>
 #include <cmath>
-using namespace std;
 
 /* 99  is c in decimal */
 /* 114 is r in decimal */
 #define COL 99
 #define ROW 114
-
-/* natural type */
-typedef unsigned int nat;
+using std::ios;
 
 template<typename type>
 class Mat
 {
+	vector<vector<type>> *buffer;
+	
+	friend istream& operator>>(istream& input, Mat<type> &A)
+	{
+		bool status = true;
+		while(status)
+		{
+			vector<type> row;
+			input >> row;
+			if(input != 0)
+			{
+				A.set_row(&row);
+				row.clear();
+				A.print();
+			}
+		}
+		return input;
+	}
+	
 private:
 	vector<vector<type> > matrix;
 	
@@ -105,10 +122,15 @@ public:
 		for(int i = 0; i < this->get_i(); i++)
 		{
 			for(int j = 0; j < this->get_j(); j++)
-				cout << setw(3) << matrix[i][j] << " ";
+				cout << setw(4) << matrix[i][j] << ' ';
 			cout << endl;
 		}
 		cout << endl;		
+	}
+	
+	void set_row(vector<type> *V)
+	{
+		this->matrix.push_back(*V);
 	}
 	
 	void copy(vector<vector<type>> *A) 
@@ -213,6 +235,8 @@ public:
 		return this->scalar_prod(k);
 	}
 	
+	
+	
 	void transpose()
 	{
 		Mat<type> T(this->get_j(), this->get_i(), 0);
@@ -290,6 +314,18 @@ public:
 				adj_matrix[i][j] = ((i+j)%2 == 0?1:-1) * Aij.det();
 			}
 		return {&adj_matrix};
+	}
+	
+	Mat<type> inverse()
+	{
+		if(type determinat = this->det() != 0)
+		{
+			auto Adj_t = this->adj();
+			Adj_t.transpose();
+			return Adj_t * (1/this->det());
+		}
+		else
+			throw "Not is inversible";
 	}
 	
 	bool is_colunm()
