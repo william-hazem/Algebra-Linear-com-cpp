@@ -20,6 +20,7 @@ Este repositório contém abstrações para matrizes e para resolver sistemas li
   - [ ] Escalonamento;
   - [ ] Refatoramento das classes;
   - [ ] Melhoria de abstração;
+  - [ ] Melhor gerênciamento de memória;
   
   A ideia é criar um ambiente que facilite a solução de problemas que utilize matrizes. Além de adicionar novos recursos, para que haja uma gama de opções mais ampla.
   
