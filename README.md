@@ -1,4 +1,4 @@
-# Algebra-Linear-com-cpp
+# Algebra-Linear-com-cpp (Re-feito)
 Este repositório contém abstrações para matrizes e para resolver sistemas lineares
 
 **Matrizes (classe):**
