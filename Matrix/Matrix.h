@@ -52,12 +52,14 @@ namespace LIAL_MATRIX
     class Matrix
     {
         void msg(const char* msg) { std::cout << msg << std::endl; }
+
         friend std::ostream& operator<<(std::ostream& output, Matrix* matrix_ptr) 
         {
             output << *matrix_ptr;
+            delete matrix_ptr;
             return output;
         }
-        friend std::ostream& operator<<(std::ostream& output, Matrix& matrix)
+        friend std::ostream& operator<<(std::ostream& output, const Matrix& matrix)
         {
             output << setprecision(matrix_print_precision);
             for (auto it_i : matrix.get())
@@ -76,7 +78,7 @@ namespace LIAL_MATRIX
          *
          */
 
-        vector<vector<Type>>* matrix_ptr;
+        vector<vector<Type>>* matrix_ptr = 0;
 
         /**
          *
@@ -84,12 +86,33 @@ namespace LIAL_MATRIX
          *
          */
 
-        void init(size_t i, size_t j, Type init_value)
+        void initMatrix(size_t i, size_t j, Type init_value)
         {
-            vector<Type>* vectorPtr = new vector<Type>(j, init_value);
-            matrix_ptr = new vector<vector<Type>>(i, *vectorPtr);
+            vector<Type> column(j, init_value);
+            matrix_ptr = new vector<vector<Type>>(i, column);
         }
 
+        bool deleteMatrix()
+        {
+            if (!matrix_ptr)
+                return false;
+            delete matrix_ptr;
+            matrix_ptr = 0;
+            return true;
+        }
+
+        void copyMatrix(const Matrix& matrix)
+        {
+            deleteMatrix(); // Delete the old matrix
+            matrix_ptr = new std::vector<std::vector<Type>>(matrix.get());
+        }
+
+        void moveMatrix(Matrix* matrix)
+        {
+            this->copyMatrix(*matrix);
+            delete matrix;
+            matrix = 0;
+        }
     public:
 
         /**
@@ -104,7 +127,7 @@ namespace LIAL_MATRIX
             matrix_ptr = 0;
         }
 
-        Matrix(Matrix& matrix)
+        Matrix(const Matrix& matrix)
         {
             msg("ctor");
             this->set(matrix);
@@ -114,12 +137,13 @@ namespace LIAL_MATRIX
         {
             msg("ctor by ptr");
             this->set(*matrix_ptr);
+            delete matrix_ptr;
         }
 
         Matrix(size_t i, size_t j = 1, Type init_value = 0)
         {
             msg("ctor");
-            init(i, j, init_value);
+            initMatrix(i, j, init_value);
         }
 
         Matrix(initializer_list<Type> init_row)
@@ -144,8 +168,9 @@ namespace LIAL_MATRIX
         {
             msg("dtor");
             delete matrix_ptr;
+            matrix_ptr = 0;
         }
-
+        
         /**
          *
          * Get Methods
@@ -185,11 +210,8 @@ namespace LIAL_MATRIX
          */
 
         void set(const Matrix& matrix)
-        {
-            if (matrix_ptr != 0)
-                delete this->matrix_ptr;
-
-            this->matrix_ptr = new  vector<vector<Type>>(matrix.get());
+        {   
+            this->copyMatrix(matrix);
         }
 
         /**
@@ -236,18 +258,18 @@ namespace LIAL_MATRIX
          * Operators Overload and Matrix Operations
          */
 
-        Matrix<Type> * operator+(const Matrix<Type>& matrix) const
+        Matrix<Type> operator+(const Matrix<Type>& matrix) const
         {
             if (this->get_i() != matrix.get_i() || this->get_j() != matrix.get_j())
                 throw "d1";
-            Matrix* result = new Matrix(this->get_i(), this->get_j(), 0);
+            Matrix result(this->get_i(), this->get_j(), 0);
             for (size_t i = 0; i < this->get_i(); i++)
                 for (size_t j = 0; j < this->get_j(); j++)
-                    (*result)[i][j] = (*this)[i][j] + matrix[i][j];
+                    (result)[i][j] = (*this)[i][j] + matrix[i][j];
             return result;
         }
 
-        Matrix<Type>& operator*(const Type scalar) const
+        Matrix<Type> operator*(const Type scalar) const
         {
             Matrix<Type>* result = new Matrix<Type>(*matrix_ptr);
             for (size_t i = 0; i < this->get_i(); i++)
@@ -256,12 +278,12 @@ namespace LIAL_MATRIX
             return *result;
         }
 
-        Matrix<Type>& operator-(const Matrix<Type>& matrix) const
+        Matrix<Type> operator-(const Matrix<Type>& matrix) const
         {
             return *this + (matrix * -1);
         }
 
-        Matrix<Type>& operator/(const Type scalar) const
+        Matrix<Type> operator/(const Type scalar) const
         {
             Matrix<Type>* result = new Matrix<Type>(*matrix_ptr);
             for (size_t i = 0; i < this->get_i(); i++)
@@ -270,7 +292,7 @@ namespace LIAL_MATRIX
             return *result;
         }
 
-        Matrix& operator*(const Matrix& matrix) const
+        Matrix operator*(const Matrix& matrix) const
         {
             if (this->get_i() != matrix.get_i() || this->get_j() != matrix.get_j())
                 throw "d1";
@@ -282,7 +304,7 @@ namespace LIAL_MATRIX
             return *result;
         }
 
-        Matrix& sub(size_t si, size_t sj) const
+        Matrix sub(size_t si, size_t sj) const
         {
             Matrix* sub_matrix_ptr = new Matrix(this->get_i()-1, this->get_j()-1, 0);
             size_t m = 0;
@@ -342,7 +364,7 @@ namespace LIAL_MATRIX
             delete transposed;
         }
 
-        Matrix<real>& adjugate()
+        Matrix<real> adjugate()
         {
             Matrix<real>* cofactor_matrix = new Matrix<real>(this->get_i(), this->get_j());
             for (size_t i = 0; i < this->get_i(); i++)
