@@ -1,0 +1,3 @@
+﻿  Application.cpp
+C:\Users\willi\git\Algebra-Linear-com-cpp\Application\Application.cpp(13,9): error C2039: ' fill': não é um membro de 'LIAL_MATRIX::Matrix<real>'
+C:\Users\willi\git\Algebra-Linear-com-cpp\Matrix\src\Matrix\Matrix.h(341): message : consulte a declaração de 'LIAL_MATRIX::Matrix<real>'
