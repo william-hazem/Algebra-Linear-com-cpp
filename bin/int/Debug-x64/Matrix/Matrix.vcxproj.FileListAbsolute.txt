@@ -1,2 +1,4 @@
 C:\Users\willi\OneDrive\Documentos\C++\Algebra Linear\bin\Debug-x64\Matrix\Matrix.pdb
 C:\Users\willi\OneDrive\Documentos\C++\Algebra Linear\bin\int\Debug-x64\Matrix\Matrix.pdb
+C:\Users\willi\git\Algebra-Linear-com-cpp\bin\Debug-x64\Matrix\Matrix.pdb
+C:\Users\willi\git\Algebra-Linear-com-cpp\bin\int\Debug-x64\Matrix\Matrix.pdb

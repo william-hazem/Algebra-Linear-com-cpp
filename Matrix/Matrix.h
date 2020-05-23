@@ -3,27 +3,19 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-typedef double real;
-
 /**
  * Global Variables
  */
 
 const short int matrix_print_set = 3;
 const short int matrix_print_precision = 2;
-
 /**
  * Includes
  */
 
 #include<vector>
-using std::vector;
-using std::initializer_list;
 #include<iostream>
-using std::ostream;
 #include <iomanip>
-using std::setprecision;
-using std::setw;
 
 #include "MatrixException.h"
 
@@ -35,24 +27,19 @@ using std::setw;
  *  Alias
  */
 
-typedef unsigned int natural;
+typedef unsigned long long natural;
+
 #ifdef LIAL_FRACTION
 typedef Fraction real;
 #else
 typedef double real;
 #endif // LIAL_FRACTION
 
-namespace LIAL_MATRIX
+namespace LIAL
 {
-    /**
-     * Class Definition
-     */
-
-    template<typename Type>
+    template<typename Type = real>
     class Matrix
     {
-        void msg(const char* msg) { std::cout << msg << std::endl; }
-
         friend std::ostream& operator<<(std::ostream& output, Matrix* matrix_ptr) 
         {
             output << *matrix_ptr;
@@ -61,15 +48,17 @@ namespace LIAL_MATRIX
         }
         friend std::ostream& operator<<(std::ostream& output, const Matrix& matrix)
         {
-            output << setprecision(matrix_print_precision);
+            // A definir o matrix_print_precision
+            output << std::setprecision(matrix_print_precision);
             for (auto it_i : matrix.get())
             {
                 for (auto it_j : it_i)
-                    output <<setw(matrix_print_set) << it_j << ' ';
+                    output << std::setw(matrix_print_set) << it_j << ' ';
                 output << '\n';
             }
             return output;
         }
+
     private:
 
         /**
@@ -78,7 +67,7 @@ namespace LIAL_MATRIX
          *
          */
 
-        vector<vector<Type>>* matrix_ptr = 0;
+        std::vector<std::vector<Type>>* matrix_ptr = 0;
 
         /**
          *
@@ -88,8 +77,16 @@ namespace LIAL_MATRIX
 
         void initMatrix(size_t i, size_t j, Type init_value)
         {
-            vector<Type> column(j, init_value);
-            matrix_ptr = new vector<vector<Type>>(i, column);
+            if (i == 0)
+            {
+                matrix_ptr = 0;
+            }
+            else
+            {
+                //Initializer a double vector, 2d Matrix.
+                std::vector<Type> column(j, init_value);
+                matrix_ptr = new std::vector<std::vector<Type>>(i, column);
+            }
         }
 
         bool deleteMatrix()
@@ -123,50 +120,43 @@ namespace LIAL_MATRIX
 
         Matrix()
         {
-            msg("ctor");
             matrix_ptr = 0;
         }
 
         Matrix(const Matrix& matrix)
         {
-            msg("ctor");
             this->set(matrix);
         }
 
         Matrix(Matrix* matrix_ptr)
         {
-            msg("ctor by ptr");
             this->set(*matrix_ptr);
-            delete matrix_ptr;
+            //descoment may cause problem with the extrautilities header
+            //delete matrix_ptr;
         }
 
         Matrix(size_t i, size_t j = 1, Type init_value = 0)
         {
-            msg("ctor");
             initMatrix(i, j, init_value);
         }
 
-        Matrix(initializer_list<Type> init_row)
+        Matrix(std::initializer_list<Type> init_row)
         {
-            msg("ctor");
-            matrix_ptr = new vector<vector<Type>>(1, init_row);
+            matrix_ptr = new std::vector<std::vector<Type>>(1, init_row);
         }
 
-        Matrix(initializer_list<initializer_list<Type>> init_matrix)
+        Matrix(std::initializer_list<std::initializer_list<Type>> init_matrix)
         {
-            msg("ctor");
-            matrix_ptr = new vector<vector<Type>>(init_matrix.begin(), init_matrix.end());
+            matrix_ptr = new std::vector<std::vector<Type>>(init_matrix.begin(), init_matrix.end());
         }
 
-        Matrix(vector<vector<Type>>& init_vector)
+        Matrix(std::vector<std::vector<Type>>& init_vector)
         {
-            msg("ctor");
-            matrix_ptr = new vector<vector<Type>>(init_vector.begin(), init_vector.end());
+            matrix_ptr = new std::vector<std::vector<Type>>(init_vector.begin(), init_vector.end());
         }
 
         virtual ~Matrix()
         {
-            msg("dtor");
             delete matrix_ptr;
             matrix_ptr = 0;
         }
@@ -180,7 +170,9 @@ namespace LIAL_MATRIX
         // Get number of rows.
         size_t get_i() const 
         { 
-            return matrix_ptr->size(); 
+            if(matrix_ptr != 0)
+                return matrix_ptr->size(); 
+            return 0;
         }
 
         // Get number of columns.
@@ -188,17 +180,16 @@ namespace LIAL_MATRIX
         {
             if (this->get_i() >= 1)
                 return (*matrix_ptr)[0].size();
-            else
-                return 0;
+            return 0;
         }
 
         // Return the vector instance
-        vector<vector<Type>> get() const
+        std::vector<std::vector<Type>> get() const
         {
             return *this->matrix_ptr;
         }
 
-        vector<vector<Type>>& get()
+        std::vector<std::vector<Type>>& get()
         {
             return *this->matrix_ptr;
         }
@@ -230,12 +221,12 @@ namespace LIAL_MATRIX
             return !(this->get() == matrix.get());
         }
 
-        vector<Type> operator[] (const size_t i) const
+        std::vector<Type> operator[] (const size_t i) const
         {
             return  (*matrix_ptr)[i];
         }
 
-        vector<Type>& operator[](const size_t i)
+        std::vector<Type>& operator[](const size_t i)
         {
             return (*matrix_ptr)[i];
         }
@@ -261,7 +252,7 @@ namespace LIAL_MATRIX
         Matrix<Type> operator+(const Matrix<Type>& matrix) const
         {
             if (this->get_i() != matrix.get_i() || this->get_j() != matrix.get_j())
-                throw "d1";
+                throw LIAL_DIM_ERRO;
             Matrix result(this->get_i(), this->get_j(), 0);
             for (size_t i = 0; i < this->get_i(); i++)
                 for (size_t j = 0; j < this->get_j(); j++)
@@ -269,13 +260,33 @@ namespace LIAL_MATRIX
             return result;
         }
 
-        Matrix<Type> operator*(const Type scalar) const
+        void operator+=(const Matrix<Type>& matrix)
         {
-            Matrix<Type>* result = new Matrix<Type>(*matrix_ptr);
+            if (!this->isSameDimension(matrix))
+                throw LIAL_DIM_ERRO;
             for (size_t i = 0; i < this->get_i(); i++)
                 for (size_t j = 0; j < this->get_j(); j++)
-                    (*result)[i][j] *= scalar;
-            return *result;
+                    (*this)[i][j] += matrix[i][j];
+        }
+
+        Matrix<Type> operator*(const Type scalar) const
+        {
+            Matrix result(*this);
+            for (size_t i = 0; i < this->get_i(); i++)
+                for (size_t j = 0; j < this->get_j(); j++)
+                    (result)[i][j] *= scalar;
+            return result;
+        }
+
+        void operator*=(const Type scalar) const
+        {
+            for (size_t i = 0; i < this->get_i(); i++)
+            {
+                for (size_t j = 0; j < this->get_j(); j++)
+                {
+                    (*this)[i][j] *= scalar;
+                }
+            }
         }
 
         Matrix<Type> operator-(const Matrix<Type>& matrix) const
@@ -283,30 +294,48 @@ namespace LIAL_MATRIX
             return *this + (matrix * -1);
         }
 
-        Matrix<Type> operator/(const Type scalar) const
+        void operator-=(const Matrix& matrix) const
         {
-            Matrix<Type>* result = new Matrix<Type>(*matrix_ptr);
+            for (size_t i = 0; i < this->get_i(); i++)
+            {
+                for (size_t j = 0; j < this->get_j(); j++)
+                {
+                    (*this)[i][j] -= matrix[i][j];
+                }
+            }
+        }
+
+        Matrix operator/(const Type scalar) const
+        {
+            Matrix result(*this);
             for (size_t i = 0; i < this->get_i(); i++)
                 for (size_t j = 0; j < this->get_j(); j++)
-                    (*result)[i][j] /= scalar;
-            return *result;
+                    (result)[i][j] /= scalar;
+            return result;
         }
 
         Matrix operator*(const Matrix& matrix) const
         {
-            if (this->get_i() != matrix.get_i() || this->get_j() != matrix.get_j())
-                throw "d1";
-            Matrix<Type>* result = new Matrix<Type>(matrix.get_i(), matrix.get_j(), 0);
+            if (this->get_j() != matrix.get_i())
+                throw LIAL_DIM_ERRO;
+            Matrix result(this->get_i(), matrix.get_j(), 0);
             for (size_t i = 0; i < matrix.get_i(); i++)
                 for (size_t j = 0; j < matrix.get_j(); j++)
                     for (size_t k = 0; k < matrix.get_i(); k++)
-                        (*result)[i][j] += (*this)[i][k] * matrix[k][j];
-            return *result;
+                        (result)[i][j] += (*this)[i][k] * matrix[k][j];
+            return result;
+        }
+
+        void operator*=(const Matrix& matrix)
+        {
+            if (this->get_j() != matrix.get_i())
+                throw LIAL_DIM_ERRO;
+            this->copyMatrix(*this * matrix);
         }
 
         Matrix sub(size_t si, size_t sj) const
         {
-            Matrix* sub_matrix_ptr = new Matrix(this->get_i()-1, this->get_j()-1, 0);
+            Matrix sub_matrix_ptr(this->get_i()-1, this->get_j()-1, 0);
             size_t m = 0;
             for (size_t i = 0; i < this->get_i(); i++)
             {
@@ -317,14 +346,14 @@ namespace LIAL_MATRIX
                     {
                         if (j != sj)
                         {
-                            (*sub_matrix_ptr)[m][n] = (*this)[i][j];
+                            (sub_matrix_ptr)[m][n] = (*this)[i][j];
                             n++;
                         }
                     }
                     m++;
                 }
             }
-            return *sub_matrix_ptr;
+            return sub_matrix_ptr;
         }
 
         #ifndef LIAL_FRACTION
@@ -332,7 +361,7 @@ namespace LIAL_MATRIX
         {
             real det_value = 0.0f;
             if (!this->isSquare())
-                throw MathDefinition("Determinant not defined for matrix [A]ij when i != j.");
+                throw LIAL_NOTSQUARE_MATRIX;
             //Determinant calculation
             for (size_t i = 0; i < this->get_i(); i++)
             {
@@ -404,7 +433,7 @@ namespace LIAL_MATRIX
         
         bool isSameDimension(const Matrix& matrix) const
         {
-            return (this->get_i() == matrix.get_i() && this->get_j() == matrix.get_j());
+            return (this->get_i() == matrix.get_i()) && (this->get_j() == matrix.get_j());
         }
 
         bool isRevesible() const
@@ -414,10 +443,23 @@ namespace LIAL_MATRIX
 
         bool isNull() const
         {
-            return (this->get_i() == 0 && this->get_j == 0);
+            for (auto _it : this->get())
+            {
+                for (auto it : _it)
+                {
+                    if (it != 0)
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        bool isEmpty() const
+        {
+            return this->get_i() == 0;
         }
     };
 
-} //namespace LIAL_MATRIX
+} //namespace LIAL
 
 #endif // Matrix.h

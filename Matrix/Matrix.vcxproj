@@ -79,9 +79,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LIALExtraUtilities.cpp" />
     <ClCompile Include="MatrixException.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lial.h" />
+    <ClInclude Include="LIALExtraUtilities.h" />
+    <ClInclude Include="LinearAlgebra.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="MatrixException.h" />
   </ItemGroup>
